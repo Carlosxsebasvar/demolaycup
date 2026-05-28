@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useActiveTournament } from "../../hooks/useTournament";
+import { useAuth } from "../../context/AuthContext";
+import { authFetch } from "../../lib/api";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
 export default function AdminGolesPage() {
   const { data: tData } = useActiveTournament();
   const tid = tData?.tournament?.id;
   const qc = useQueryClient();
+  const { getToken } = useAuth();
 
   const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
   const [form, setForm] = useState({ playerName: "", teamId: "", quantity: 1 });
@@ -51,9 +54,8 @@ export default function AdminGolesPage() {
     mutationFn: async () => {
       const qty = Math.max(1, Math.min(20, Number(form.quantity) || 1));
       for (let i = 0; i < qty; i++) {
-        await fetch("/api/goals", {
+        await authFetch(getToken(), "/api/goals", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             matchId: selectedMatch,
             teamId: Number(form.teamId),
@@ -71,7 +73,7 @@ export default function AdminGolesPage() {
 
   const deleteGoal = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`/api/goals/${id}`, { method: "DELETE" });
+      await authFetch(getToken(), `/api/goals/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["goals", selectedMatch] });

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useActiveTournament } from "../../hooks/useTournament";
+import { useAuth } from "../../context/AuthContext";
+import { authFetch } from "../../lib/api";
 import { ArrowLeft, Plus, Trash2, CheckCircle, Pencil, X } from "lucide-react";
 
 const PHASES = ["grupos", "cuartos", "semis", "final"];
@@ -15,6 +17,7 @@ interface EditState {
 
 export default function AdminPartidosPage() {
   const { data: tData } = useActiveTournament();
+  const { getToken } = useAuth();
   const tid = tData?.tournament?.id;
   const qc = useQueryClient();
 
@@ -48,9 +51,8 @@ export default function AdminPartidosPage() {
 
   const addMatch = useMutation({
     mutationFn: async () => {
-      await fetch("/api/matches", {
+      await authFetch(getToken(), "/api/matches", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tournamentId: tid,
           homeTeamId: Number(form.homeTeamId),
@@ -73,9 +75,8 @@ export default function AdminPartidosPage() {
 
   const saveMatch = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`/api/matches/${id}`, {
+      await authFetch(getToken(), `/api/matches/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           homeScore: editState.home !== "" ? Number(editState.home) : null,
           awayScore: editState.away !== "" ? Number(editState.away) : null,
@@ -94,7 +95,7 @@ export default function AdminPartidosPage() {
 
   const deleteMatch = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`/api/matches/${id}`, { method: "DELETE" });
+      await authFetch(getToken(), `/api/matches/${id}`, { method: "DELETE" });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["matches"] }),
   });

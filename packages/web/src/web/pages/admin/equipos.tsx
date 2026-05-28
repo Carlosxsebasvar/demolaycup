@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useActiveTournament } from "../../hooks/useTournament";
+import { useAuth } from "../../context/AuthContext";
+import { authFetch } from "../../lib/api";
 import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function AdminEquiposPage() {
   const { data: tData } = useActiveTournament();
   const tid = tData?.tournament?.id;
   const qc = useQueryClient();
+  const { getToken } = useAuth();
 
   const [expandedTeam, setExpandedTeam] = useState<number | null>(null);
   const [newTeamName, setNewTeamName] = useState("");
@@ -43,9 +46,8 @@ export default function AdminEquiposPage() {
 
   const addTeam = useMutation({
     mutationFn: async () => {
-      await fetch("/api/teams", {
+      await authFetch(getToken(), "/api/teams", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: tid, name: newTeamName, groupId: newGroupId ? Number(newGroupId) : null }),
       });
     },
@@ -54,16 +56,15 @@ export default function AdminEquiposPage() {
 
   const deleteTeam = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`/api/teams/${id}`, { method: "DELETE" });
+      await authFetch(getToken(), `/api/teams/${id}`, { method: "DELETE" });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teams"] }),
   });
 
   const addPlayer = useMutation({
     mutationFn: async () => {
-      await fetch("/api/players", {
+      await authFetch(getToken(), "/api/players", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ teamId: newPlayerTeam, name: newPlayerName }),
       });
     },
@@ -72,7 +73,7 @@ export default function AdminEquiposPage() {
 
   const deletePlayer = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`/api/players/${id}`, { method: "DELETE" });
+      await authFetch(getToken(), `/api/players/${id}`, { method: "DELETE" });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["all-players"] }),
   });

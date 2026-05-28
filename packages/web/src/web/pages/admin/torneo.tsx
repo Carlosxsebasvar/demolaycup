@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useActiveTournament } from "../../hooks/useTournament";
+import { useAuth } from "../../context/AuthContext";
+import { authFetch } from "../../lib/api";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
 export default function AdminTorneoPage() {
   const { data: tData, isLoading } = useActiveTournament();
   const tid = tData?.tournament?.id;
   const qc = useQueryClient();
+  const { getToken } = useAuth();
 
   const [name, setName] = useState("");
   const [season, setSeason] = useState("");
@@ -30,9 +33,8 @@ export default function AdminTorneoPage() {
 
   const updateTournament = useMutation({
     mutationFn: async () => {
-      await fetch(`/api/tournaments/${tid}`, {
+      await authFetch(getToken(), `/api/tournaments/${tid}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, season }),
       });
     },
@@ -41,9 +43,8 @@ export default function AdminTorneoPage() {
 
   const addGroup = useMutation({
     mutationFn: async () => {
-      await fetch("/api/groups", {
+      await authFetch(getToken(), "/api/groups", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: tid, name: newGroupName }),
       });
     },
@@ -52,7 +53,7 @@ export default function AdminTorneoPage() {
 
   const deleteGroup = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`/api/groups/${id}`, { method: "DELETE" });
+      await authFetch(getToken(), `/api/groups/${id}`, { method: "DELETE" });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["groups"] }),
   });
@@ -60,10 +61,9 @@ export default function AdminTorneoPage() {
   const createNewTournament = useMutation({
     mutationFn: async () => {
       // deactivate current
-      if (tid) await fetch(`/api/tournaments/${tid}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active: false }) });
-      await fetch("/api/tournaments", {
+      if (tid) await authFetch(getToken(), `/api/tournaments/${tid}`, { method: "PUT", body: JSON.stringify({ active: false }) });
+      await authFetch(getToken(), "/api/tournaments", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: "Nuevo Torneo", season: new Date().getFullYear().toString(), active: true }),
       });
     },

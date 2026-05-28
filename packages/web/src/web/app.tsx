@@ -1,6 +1,7 @@
 import { Route, Switch } from "wouter";
 import { Layout } from "./components/Layout";
 import { AuthProvider } from "./context/AuthContext";
+import { AdminGuard } from "./components/AdminGuard";
 import HomePage from "./pages/index";
 import GruposPage from "./pages/grupos";
 import PartidosPage from "./pages/partidos";
@@ -16,15 +17,26 @@ export default function App() {
     <AuthProvider>
       <Layout>
         <Switch>
+          {/* Páginas públicas */}
           <Route path="/" component={HomePage} />
           <Route path="/grupos" component={GruposPage} />
           <Route path="/partidos" component={PartidosPage} />
           <Route path="/llaves" component={LlavesPage} />
           <Route path="/goleadores" component={GoleadoresPage} />
-          <Route path="/admin/partidos" component={AdminPartidosPage} />
-          <Route path="/admin/equipos" component={AdminEquiposPage} />
-          <Route path="/admin/goles" component={AdminGolesPage} />
-          <Route path="/admin/torneo" component={AdminTorneoPage} />
+
+          {/* Páginas admin — requieren login */}
+          <Route path="/admin/partidos">
+            <AdminGuard><AdminPartidosPage /></AdminGuard>
+          </Route>
+          <Route path="/admin/equipos">
+            <AdminGuard><AdminEquiposPage /></AdminGuard>
+          </Route>
+          <Route path="/admin/goles">
+            <AdminGuard><AdminGolesPage /></AdminGuard>
+          </Route>
+          <Route path="/admin/torneo">
+            <AdminGuard><AdminTorneoPage /></AdminGuard>
+          </Route>
         </Switch>
       </Layout>
     </AuthProvider>

@@ -21,9 +21,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [shake, setShake] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const ok = login(user, pass);
+    setLoading(true);
+    const ok = await login(user, pass);
+    setLoading(false);
     if (ok) {
       setShowModal(false);
       setUser("");
@@ -179,11 +183,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 />
               </div>
               {error && <div style={{ color: "var(--danger)", fontSize: 12, textAlign: "center", fontWeight: 600 }}>Usuario o contraseña incorrectos</div>}
-              <button type="submit" style={{
+              <button type="submit" disabled={loading} style={{
                 padding: "11px", background: "var(--gold)", color: "#000",
                 border: "none", borderRadius: 8, fontWeight: 800, fontSize: 13,
-                cursor: "pointer", fontFamily: "Poppins, sans-serif", letterSpacing: 1,
-              }}>INGRESAR</button>
+                cursor: loading ? "not-allowed" : "pointer", fontFamily: "Poppins, sans-serif", letterSpacing: 1,
+                opacity: loading ? 0.7 : 1,
+              }}>{loading ? "VERIFICANDO..." : "INGRESAR"}</button>
             </form>
           </div>
         </>
