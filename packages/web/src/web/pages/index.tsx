@@ -49,7 +49,7 @@ export default function HomePage() {
         <div style={{ fontSize: 32, marginBottom: 4 }}>🏆</div>
         <div style={{ fontWeight: 900, fontSize: 22, color: "var(--gold)", letterSpacing: 2 }}>DEMOLAY CUP</div>
         <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, letterSpacing: 1 }}>
-          {tData?.tournament?.season ?? "2025"} · FÚTBOL
+          {tData?.tournament?.season ?? "2026"} · FÚTBOL
         </div>
       </div>
 
