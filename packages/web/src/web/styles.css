@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg: #0D1117;
+  --surface: #161B22;
+  --surface2: #21262D;
+  --gold: #F59E0B;
+  --gold-dark: #D97706;
+  --text: #FFFFFF;
+  --text-muted: #8B949E;
+  --danger: #EF4444;
+  --success: #22C55E;
+  --border: #30363D;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+#root {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.gold { color: var(--gold); }
+.text-muted { color: var(--text-muted); }
+
+/* Tab bar bottom safe area */
+.pb-safe { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
