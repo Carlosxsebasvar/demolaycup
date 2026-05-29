@@ -56,10 +56,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         position: "sticky", top: 0, zIndex: 100,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: "50%", background: "var(--gold)",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
-          }}>⚽</div>
+          <img
+            src="/logo-region-oeste.png"
+            alt="Región Oeste"
+            style={{
+              width: 38, height: 38, borderRadius: "50%",
+              objectFit: "contain",
+              flexShrink: 0,
+            }}
+          />
           <div>
             <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: 1, color: "var(--gold)" }}>DEMOLAY CUP</div>
             <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: 2 }}>APERTURA 2026</div>
