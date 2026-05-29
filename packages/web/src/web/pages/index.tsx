@@ -57,7 +57,7 @@ export default function HomePage() {
           }}
         />
         <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, letterSpacing: 1 }}>
-          {tData?.tournament?.season ?? "2026"} · FÚTBOL
+          RESPETO · COMPAÑERISMO · PASIÓN
         </div>
       </div>
 
