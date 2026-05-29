@@ -246,6 +246,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: 1 }}>DESARROLLO WEB</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gold)" }}>Horimiya (Carlos Vargas)</div>
               </div>
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 12, textAlign: "right" }}>
+                <button
+                  onClick={() => {
+                    setShowCredits(false);
+                    if (isAdmin) {
+                      setShowAdminPanel(true);
+                    } else {
+                      setShowModal(true);
+                    }
+                  }}
+                  style={{
+                    background: "none", border: "1px solid var(--border)",
+                    color: "var(--text-muted)", borderRadius: 6,
+                    padding: "5px 12px", fontSize: 11, cursor: "pointer",
+                    fontFamily: "Poppins, sans-serif", letterSpacing: 1,
+                  }}>
+                  Administración
+                </button>
+              </div>
             </div>
           </div>
         </>
