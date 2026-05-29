@@ -50,14 +50,12 @@ export default function HomePage() {
           src="/logo-demolay-cup.png"
           alt="DEMOLAY CUP"
           style={{
-            width: 110, height: 110,
+            width: 130, height: 130,
             objectFit: "contain",
-            marginBottom: 8,
             display: "block",
-            margin: "0 auto 8px",
+            margin: "0 auto",
           }}
         />
-        <div style={{ fontWeight: 900, fontSize: 22, color: "var(--gold)", letterSpacing: 2 }}>DEMOLAY CUP</div>
         <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, letterSpacing: 1 }}>
           {tData?.tournament?.season ?? "2026"} · FÚTBOL
         </div>
