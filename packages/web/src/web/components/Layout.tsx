@@ -22,6 +22,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [showCredits, setShowCredits] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +73,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <button
-          onClick={() => isAdmin ? setShowAdminPanel(v => !v) : setShowModal(true)}
+          onClick={() => isAdmin ? setShowAdminPanel(v => !v) : setShowCredits(true)}
           style={{
             width: 36, height: 36, borderRadius: 8,
             background: isAdmin ? "rgba(245,158,11,0.15)" : "var(--surface2)",
@@ -195,6 +196,57 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 opacity: loading ? 0.7 : 1,
               }}>{loading ? "VERIFICANDO..." : "INGRESAR"}</button>
             </form>
+          </div>
+        </>
+      )}
+
+      {/* ── MODAL CRÉDITOS ── */}
+      {showCredits && (
+        <>
+          <div
+            onClick={() => setShowCredits(false)}
+            style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(4px)" }}
+          />
+          <div style={{
+            position: "fixed", top: "50%", left: "50%", zIndex: 201,
+            transform: "translate(-50%, -50%)",
+            width: "calc(100% - 40px)", maxWidth: 340,
+          }}>
+            {/* Header */}
+            <div style={{
+              background: "var(--gold)", color: "#000",
+              borderRadius: "12px 12px 0 0", padding: "14px 16px",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}>
+              <span style={{ fontWeight: 800, fontSize: 14, letterSpacing: 1 }}>DEMOLAY CUP · Apertura 2026</span>
+              <button onClick={() => setShowCredits(false)}
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+                <X size={18} color="#000" />
+              </button>
+            </div>
+            {/* Body */}
+            <div style={{
+              background: "var(--surface)", border: "1px solid var(--border)",
+              borderTop: "none", borderRadius: "0 0 12px 12px",
+              padding: "20px 16px", display: "flex", flexDirection: "column", gap: 14,
+            }}>
+              <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, margin: 0 }}>
+                La versión digital de la <strong style={{ color: "var(--gold)" }}>DEMOLAY CUP</strong> fue impulsada durante el período del <strong style={{ color: "var(--gold)" }}>Maestro Consejero Regional, Mauricio Ayala</strong>, junto al <strong style={{ color: "var(--gold)" }}>Secretario Regional, Yonathan Martínez</strong>.
+              </p>
+              <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, margin: 0 }}>
+                Esta app acompaña al torneo como una herramienta para consultar fixture, resultados, tabla de posiciones, goleadores y llaves de forma rápida y ordenada.
+              </p>
+              <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, margin: 0 }}>
+                Un espacio para fortalecer la <strong style={{ color: "var(--gold)" }}>fraternidad, el compañerismo, el respeto y la sana competencia</strong> dentro de la Región Oeste.
+              </p>
+              <div style={{
+                borderTop: "1px solid var(--border)", paddingTop: 12,
+                display: "flex", flexDirection: "column", gap: 4,
+              }}>
+                <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: 1 }}>DESARROLLO WEB</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--gold)" }}>Horimiya (Carlos Vargas)</div>
+              </div>
+            </div>
           </div>
         </>
       )}
