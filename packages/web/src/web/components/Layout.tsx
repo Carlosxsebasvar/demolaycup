@@ -231,7 +231,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               padding: "20px 16px", display: "flex", flexDirection: "column", gap: 14,
             }}>
               <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, margin: 0 }}>
-                La versión digital de la <strong style={{ color: "var(--gold)" }}>DEMOLAY CUP</strong> fue impulsada durante el período del <strong style={{ color: "var(--gold)" }}>Maestro Consejero Regional, Mauricio Ayala</strong>, junto al <strong style={{ color: "var(--gold)" }}>Secretario Regional, Yonathan Martínez</strong>.
+                La versión digital de la <strong style={{ color: "var(--gold)" }}>DEMOLAY CUP</strong> fue impulsada durante el período del <strong style={{ color: "var(--gold)" }}>Maestro Consejero Regional, Mauricio Ayala</strong>, junto al <strong style={{ color: "var(--gold)" }}>Maestro Consejero Regional Adjunto, Axel Chávez</strong>, y al <strong style={{ color: "var(--gold)" }}>Secretario Regional, Yonathan Martínez</strong>.
               </p>
               <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, margin: 0 }}>
                 Esta app acompaña al torneo como una herramienta para consultar fixture, resultados, tabla de posiciones, goleadores y llaves de forma rápida y ordenada.
