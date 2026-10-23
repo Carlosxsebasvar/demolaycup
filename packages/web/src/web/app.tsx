@@ -11,6 +11,7 @@ import AdminPartidosPage from "./pages/admin/partidos";
 import AdminEquiposPage from "./pages/admin/equipos";
 import AdminGolesPage from "./pages/admin/goles";
 import AdminTorneoPage from "./pages/admin/torneo";
+import AdminPlanillasPage from "./pages/admin/planillas";
 
 export default function App() {
   return (
@@ -36,6 +37,9 @@ export default function App() {
           </Route>
           <Route path="/admin/torneo">
             <AdminGuard><AdminTorneoPage /></AdminGuard>
+          </Route>
+          <Route path="/admin/planillas">
+            <AdminGuard><AdminPlanillasPage /></AdminGuard>
           </Route>
         </Switch>
       </Layout>

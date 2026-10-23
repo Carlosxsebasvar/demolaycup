@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Users, Calendar, Target, Settings, Database, ArrowLeft } from "lucide-react";
+import { Users, Calendar, Target, Settings, Database, ArrowLeft, Printer } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useActiveTournament } from "../../hooks/useTournament";
 
@@ -87,6 +87,7 @@ export default function AdminPage() {
         <AdminCard to="/admin/partidos" icon={<Calendar size={22} color="var(--gold)" />} title="Partidos" desc="Cargar resultados y fixtures" />
         <AdminCard to="/admin/goles" icon={<Target size={22} color="var(--gold)" />} title="Goles" desc="Registrar goleadores por partido" />
         <AdminCard to="/admin/torneo" icon={<Settings size={22} color="var(--gold)" />} title="Torneo" desc="Configurar nombre, grupos, temporada" />
+        <AdminCard to="/admin/planillas" icon={<Printer size={22} color="var(--gold)" />} title="Imprimir Planilla" desc="Planilla de buena fe por partido" />
       </div>
 
       {tournament && (
