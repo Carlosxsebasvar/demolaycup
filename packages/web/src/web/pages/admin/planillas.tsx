@@ -153,21 +153,29 @@ function TeamColumn({ name, players }: { name?: string; players: any[] }) {
       <table className="sheet-table">
         <thead>
           <tr>
-            <th className="col-num">#</th>
+            <th className="col-idx">N°</th>
             <th>Nombre y Apellido</th>
+            <th className="col-shirt">Camiseta</th>
+            <th className="col-mark">Goles</th>
+            <th className="col-mark">T.A.</th>
+            <th className="col-mark">T.R.</th>
             <th className="col-sign">Firma</th>
           </tr>
         </thead>
         <tbody>
           {sorted.map((p, i) => (
             <tr key={p.id}>
-              <td className="col-num">{p.number ?? i + 1}</td>
+              <td className="col-idx">{i + 1}</td>
               <td>{p.name}</td>
+              <td className="col-shirt"></td>
+              <td className="col-mark"></td>
+              <td className="col-mark"></td>
+              <td className="col-mark"></td>
               <td className="col-sign"></td>
             </tr>
           ))}
           {sorted.length === 0 && (
-            <tr><td colSpan={3} style={{ textAlign: "center", color: "#999" }}>Sin jugadores cargados</td></tr>
+            <tr><td colSpan={7} style={{ textAlign: "center", color: "#999" }}>Sin jugadores cargados</td></tr>
           )}
         </tbody>
       </table>

@@ -51,7 +51,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
 
       {/* ── HEADER ── */}
-      <header style={{
+      <header className="no-print" style={{
         background: "var(--surface)", borderBottom: "2px solid var(--gold)",
         padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between",
         position: "sticky", top: 0, zIndex: 100,
@@ -87,7 +87,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* ── ADMIN PANEL (drawer) ── */}
       {isAdmin && showAdminPanel && (
-        <div style={{
+        <div className="no-print" style={{
           background: "var(--surface)", borderBottom: "2px solid var(--gold)",
           padding: "14px 16px",
         }}>
@@ -118,7 +118,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* ── BOTTOM NAV ── */}
-      <nav style={{
+      <nav className="no-print" style={{
         position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
         width: "100%", maxWidth: 480,
         background: "var(--surface)", borderTop: "1px solid var(--border)",
