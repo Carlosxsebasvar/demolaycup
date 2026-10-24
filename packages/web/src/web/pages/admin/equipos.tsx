@@ -5,6 +5,18 @@ import { useAuth } from "../../context/AuthContext";
 import { authFetch } from "../../lib/api";
 import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, ListPlus } from "lucide-react";
 
+async function checkOk(res: Response) {
+  if (!res.ok) {
+    let msg = `Error ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.error) msg = body.error;
+    } catch {}
+    throw new Error(msg);
+  }
+  return res;
+}
+
 export default function AdminEquiposPage() {
   const { data: tData } = useActiveTournament();
   const tid = tData?.tournament?.id;
@@ -13,7 +25,7 @@ export default function AdminEquiposPage() {
 
   const [expandedTeam, setExpandedTeam] = useState<number | null>(null);
   const [newTeamName, setNewTeamName] = useState("");
-  const [newGroupId, setNewGroupId] = useState<string>("");
+  const [newGroupName, setNewGroupName] = useState("");
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerTeam, setNewPlayerTeam] = useState<number | null>(null);
   const [bulkText, setBulkText] = useState("");
@@ -49,51 +61,83 @@ export default function AdminEquiposPage() {
 
   const addTeam = useMutation({
     mutationFn: async () => {
-      await authFetch(getToken(), "/api/teams", {
+      const token = getToken();
+      let groupId: number | null = null;
+      const typedGroup = newGroupName.trim();
+      if (typedGroup) {
+        const existing = groups.find((g: any) => g.name.toLowerCase() === typedGroup.toLowerCase());
+        if (existing) {
+          groupId = existing.id;
+        } else {
+          const res = await authFetch(token, "/api/groups", {
+            method: "POST",
+            body: JSON.stringify({ tournamentId: tid, name: typedGroup }),
+          });
+          await checkOk(res);
+          const { group } = await res.json();
+          groupId = group.id;
+        }
+      }
+      const res = await authFetch(token, "/api/teams", {
         method: "POST",
-        body: JSON.stringify({ tournamentId: tid, name: newTeamName, groupId: newGroupId ? Number(newGroupId) : null }),
+        body: JSON.stringify({ tournamentId: tid, name: newTeamName, groupId }),
       });
+      await checkOk(res);
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["teams"] }); setNewTeamName(""); setNewGroupId(""); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teams"] });
+      qc.invalidateQueries({ queryKey: ["groups"] });
+      setNewTeamName("");
+      setNewGroupName("");
+    },
+    onError: (err: any) => alert(`No se pudo agregar el equipo: ${err.message}`),
   });
 
   const deleteTeam = useMutation({
     mutationFn: async (id: number) => {
-      await authFetch(getToken(), `/api/teams/${id}`, { method: "DELETE" });
+      const res = await authFetch(getToken(), `/api/teams/${id}`, { method: "DELETE" });
+      await checkOk(res);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teams"] }),
+    onError: (err: any) => alert(`No se pudo eliminar el equipo: ${err.message}`),
   });
 
   const addPlayer = useMutation({
     mutationFn: async () => {
-      await authFetch(getToken(), "/api/players", {
+      const res = await authFetch(getToken(), "/api/players", {
         method: "POST",
         body: JSON.stringify({ teamId: newPlayerTeam, name: newPlayerName }),
       });
+      await checkOk(res);
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["all-players"] }); setNewPlayerName(""); setNewPlayerTeam(null); },
+    onError: (err: any) => alert(`No se pudo agregar el jugador: ${err.message}`),
   });
 
   const deletePlayer = useMutation({
     mutationFn: async (id: number) => {
-      await authFetch(getToken(), `/api/players/${id}`, { method: "DELETE" });
+      const res = await authFetch(getToken(), `/api/players/${id}`, { method: "DELETE" });
+      await checkOk(res);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["all-players"] }),
+    onError: (err: any) => alert(`No se pudo eliminar el jugador: ${err.message}`),
   });
 
   const bulkAddPlayers = useMutation({
     mutationFn: async () => {
       const names = bulkText.split("\n").map(n => n.trim()).filter(Boolean).slice(0, 25);
-      await authFetch(getToken(), "/api/players/bulk", {
+      const res = await authFetch(getToken(), "/api/players/bulk", {
         method: "POST",
         body: JSON.stringify({ teamId: bulkTeam, names }),
       });
+      await checkOk(res);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["all-players"] });
       setBulkText("");
       setShowBulk(null);
     },
+    onError: (err: any) => alert(`No se pudo cargar la lista: ${err.message}`),
   });
 
   const teams = teamsData?.teams ?? [];
@@ -113,10 +157,19 @@ export default function AdminEquiposPage() {
           placeholder="Nombre del equipo"
           style={inputStyle}
         />
-        <select value={newGroupId} onChange={e => setNewGroupId(e.target.value)} style={{ ...inputStyle, marginTop: 8 }}>
-          <option value="">Sin grupo</option>
-          {groups.map((g: any) => <option key={g.id} value={g.id}>{g.name}</option>)}
-        </select>
+        <input
+          value={newGroupName}
+          onChange={e => setNewGroupName(e.target.value)}
+          placeholder="Grupo (opcional) — ej: Grupo A"
+          list="group-names"
+          style={{ ...inputStyle, marginTop: 8 }}
+        />
+        <datalist id="group-names">
+          {groups.map((g: any) => <option key={g.id} value={g.name} />)}
+        </datalist>
+        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
+          Dejalo vacío si todavía no tiene grupo, o escribí uno nuevo y se crea solo.
+        </div>
         <button
           onClick={() => newTeamName && addTeam.mutate()}
           disabled={!newTeamName || addTeam.isPending}
