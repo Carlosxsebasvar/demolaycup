@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useActiveTournament } from "../../hooks/useTournament";
 import { useAuth } from "../../context/AuthContext";
 import { authFetch } from "../../lib/api";
-import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, ListPlus } from "lucide-react";
 
 export default function AdminEquiposPage() {
   const { data: tData } = useActiveTournament();
@@ -16,6 +16,9 @@ export default function AdminEquiposPage() {
   const [newGroupId, setNewGroupId] = useState<string>("");
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerTeam, setNewPlayerTeam] = useState<number | null>(null);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkTeam, setBulkTeam] = useState<number | null>(null);
+  const [showBulk, setShowBulk] = useState<number | null>(null);
 
   const { data: teamsData } = useQuery({
     queryKey: ["teams", tid],
@@ -76,6 +79,21 @@ export default function AdminEquiposPage() {
       await authFetch(getToken(), `/api/players/${id}`, { method: "DELETE" });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["all-players"] }),
+  });
+
+  const bulkAddPlayers = useMutation({
+    mutationFn: async () => {
+      const names = bulkText.split("\n").map(n => n.trim()).filter(Boolean).slice(0, 25);
+      await authFetch(getToken(), "/api/players/bulk", {
+        method: "POST",
+        body: JSON.stringify({ teamId: bulkTeam, names }),
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["all-players"] });
+      setBulkText("");
+      setShowBulk(null);
+    },
   });
 
   const teams = teamsData?.teams ?? [];
@@ -176,6 +194,42 @@ export default function AdminEquiposPage() {
                       <Plus size={16} />
                     </button>
                   </div>
+
+                  {/* Carga masiva de jugadores */}
+                  <button
+                    onClick={() => { setShowBulk(showBulk === team.id ? null : team.id); setBulkTeam(team.id); setBulkText(""); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      background: "none", border: "none", color: "var(--gold)",
+                      fontSize: 12, fontWeight: 700, cursor: "pointer",
+                      padding: "10px 0 0", fontFamily: "Poppins, sans-serif",
+                    }}
+                  >
+                    <ListPlus size={14} />
+                    {showBulk === team.id ? "Cerrar carga masiva" : "Pegar lista de jugadores (hasta 25)"}
+                  </button>
+
+                  {showBulk === team.id && (
+                    <div style={{ marginTop: 8 }}>
+                      <textarea
+                        value={bulkText}
+                        onChange={e => setBulkText(e.target.value)}
+                        placeholder={"Pegá un nombre por línea, ej:\nJuan Pérez\nCarlos Gómez\nLuis Fernández"}
+                        rows={6}
+                        style={{ ...inputStyle, resize: "vertical", fontFamily: "Poppins, sans-serif" }}
+                      />
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
+                        {bulkText.split("\n").map(n => n.trim()).filter(Boolean).length} / 25 nombres detectados
+                      </div>
+                      <button
+                        onClick={() => bulkText.trim() && bulkAddPlayers.mutate()}
+                        disabled={!bulkText.trim() || bulkAddPlayers.isPending}
+                        style={{ ...btnStyle, width: "100%", justifyContent: "center" }}
+                      >
+                        {bulkAddPlayers.isPending ? "Cargando..." : "Cargar lista completa"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

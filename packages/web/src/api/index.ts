@@ -109,6 +109,21 @@ const app = new Hono()
     const [player] = await db.insert(schema.players).values(body).returning();
     return c.json({ player }, 201);
   })
+  .post("/players/bulk", requireAdmin, async (c) => {
+    const { teamId, names } = await c.req.json<{ teamId: number; names: string[] }>();
+    const clean = (names ?? [])
+      .map((n) => n.trim())
+      .filter((n) => n.length > 0)
+      .slice(0, 25);
+    if (!teamId || clean.length === 0) {
+      return c.json({ error: "Faltan teamId o nombres" }, 400);
+    }
+    const players = await db
+      .insert(schema.players)
+      .values(clean.map((name) => ({ teamId, name })))
+      .returning();
+    return c.json({ players }, 201);
+  })
   .put("/players/:id", requireAdmin, async (c) => {
     const id = Number(c.req.param("id"));
     const body = await c.req.json();
