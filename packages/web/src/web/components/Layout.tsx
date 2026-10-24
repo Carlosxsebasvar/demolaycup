@@ -107,6 +107,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <AdminLink to="/admin/goles" label="Registrar goleadores" desc="Quién anotó en cada partido" />
             <AdminLink to="/admin/equipos" label="Gestionar equipos" desc="Agregar o editar equipos" />
             <AdminLink to="/admin/torneo" label="Configurar torneo" desc="Nombre, temporada, grupos" />
+            <AdminLink to="/admin/planillas" label="Imprimir Planilla" desc="Planilla de buena fe por partido" />
           </div>
         </div>
       )}
