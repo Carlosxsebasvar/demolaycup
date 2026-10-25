@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { db } from "./database";
 import * as schema from "./database/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, or, inArray, sql } from "drizzle-orm";
 import { createToken, validateCredentials, requireAdmin } from "./auth";
 
 const app = new Hono()
@@ -79,7 +79,24 @@ const app = new Hono()
   })
   .delete("/teams/:id", requireAdmin, async (c) => {
     const id = Number(c.req.param("id"));
+
+    // Borra en cascada todo lo que referencia a este equipo para evitar
+    // el error de clave foránea (500) al eliminar un equipo con datos cargados.
+    const relatedMatches = await db
+      .select({ id: schema.matches.id })
+      .from(schema.matches)
+      .where(or(eq(schema.matches.homeTeamId, id), eq(schema.matches.awayTeamId, id)));
+    const matchIds = relatedMatches.map((m) => m.id);
+
+    if (matchIds.length > 0) {
+      await db.delete(schema.goals).where(inArray(schema.goals.matchId, matchIds));
+      await db.delete(schema.matches).where(inArray(schema.matches.id, matchIds));
+    }
+    await db.delete(schema.goals).where(eq(schema.goals.teamId, id));
+    await db.delete(schema.freeTeams).where(eq(schema.freeTeams.teamId, id));
+    await db.delete(schema.players).where(eq(schema.players.teamId, id));
     await db.delete(schema.teams).where(eq(schema.teams.id, id));
+
     return c.json({ ok: true }, 200);
   })
 

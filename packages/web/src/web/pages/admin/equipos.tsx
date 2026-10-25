@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useActiveTournament } from "../../hooks/useTournament";
 import { useAuth } from "../../context/AuthContext";
 import { authFetch } from "../../lib/api";
-import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, ListPlus } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, ListPlus, Pencil, Check, X } from "lucide-react";
 
 async function checkOk(res: Response) {
   if (!res.ok) {
@@ -31,6 +31,9 @@ export default function AdminEquiposPage() {
   const [bulkText, setBulkText] = useState("");
   const [bulkTeam, setBulkTeam] = useState<number | null>(null);
   const [showBulk, setShowBulk] = useState<number | null>(null);
+  const [editingTeam, setEditingTeam] = useState<number | null>(null);
+  const [editTeamName, setEditTeamName] = useState("");
+  const [editGroupName, setEditGroupName] = useState("");
 
   const { data: teamsData } = useQuery({
     queryKey: ["teams", tid],
@@ -100,6 +103,39 @@ export default function AdminEquiposPage() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teams"] }),
     onError: (err: any) => alert(`No se pudo eliminar el equipo: ${err.message}`),
+  });
+
+  const editTeam = useMutation({
+    mutationFn: async (id: number) => {
+      const token = getToken();
+      let groupId: number | null = null;
+      const typedGroup = editGroupName.trim();
+      if (typedGroup) {
+        const existing = groups.find((g: any) => g.name.toLowerCase() === typedGroup.toLowerCase());
+        if (existing) {
+          groupId = existing.id;
+        } else {
+          const res = await authFetch(token, "/api/groups", {
+            method: "POST",
+            body: JSON.stringify({ tournamentId: tid, name: typedGroup }),
+          });
+          await checkOk(res);
+          const { group } = await res.json();
+          groupId = group.id;
+        }
+      }
+      const res = await authFetch(token, `/api/teams/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ name: editTeamName.trim(), groupId }),
+      });
+      await checkOk(res);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teams"] });
+      qc.invalidateQueries({ queryKey: ["groups"] });
+      setEditingTeam(null);
+    },
+    onError: (err: any) => alert(`No se pudo editar el equipo: ${err.message}`),
   });
 
   const addPlayer = useMutation({
@@ -189,26 +225,77 @@ export default function AdminEquiposPage() {
           const teamPlayers = allPlayers.filter((p: any) => p.teamId === team.id);
           const groupName = groups.find((g: any) => g.id === team.groupId)?.name ?? "Sin grupo";
           const expanded = expandedTeam === team.id;
+          const isEditing = editingTeam === team.id;
           return (
             <div key={team.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
-              <div
-                style={{ display: "flex", alignItems: "center", padding: "12px 14px", cursor: "pointer", gap: 10 }}
-                onClick={() => setExpandedTeam(expanded ? null : team.id)}
-              >
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>{team.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{groupName} · {teamPlayers.length} jugadores</div>
+              {isEditing ? (
+                <div style={{ padding: "12px 14px" }} onClick={e => e.stopPropagation()}>
+                  <input
+                    value={editTeamName}
+                    onChange={e => setEditTeamName(e.target.value)}
+                    placeholder="Nombre del equipo"
+                    style={inputStyle}
+                  />
+                  <input
+                    value={editGroupName}
+                    onChange={e => setEditGroupName(e.target.value)}
+                    placeholder="Grupo (opcional) — ej: Grupo A"
+                    list="group-names"
+                    style={{ ...inputStyle, marginTop: 8, marginBottom: 10 }}
+                  />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={() => editTeamName.trim() && editTeam.mutate(team.id)}
+                      disabled={!editTeamName.trim() || editTeam.isPending}
+                      style={{ ...btnStyle, flex: 1, justifyContent: "center", marginTop: 0 }}
+                    >
+                      <Check size={14} style={{ marginRight: 6 }} />
+                      {editTeam.isPending ? "Guardando..." : "Guardar"}
+                    </button>
+                    <button
+                      onClick={() => setEditingTeam(null)}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: "var(--surface2)", border: "1px solid var(--border)",
+                        borderRadius: 8, padding: "10px 16px", color: "var(--text-muted)",
+                        fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "Poppins, sans-serif",
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={e => { e.stopPropagation(); if (confirm(`¿Eliminar ${team.name}?`)) deleteTeam.mutate(team.id); }}
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: "var(--danger)" }}
+              ) : (
+                <div
+                  style={{ display: "flex", alignItems: "center", padding: "12px 14px", cursor: "pointer", gap: 10 }}
+                  onClick={() => setExpandedTeam(expanded ? null : team.id)}
                 >
-                  <Trash2 size={15} />
-                </button>
-                {expanded ? <ChevronUp size={16} color="var(--text-muted)" /> : <ChevronDown size={16} color="var(--text-muted)" />}
-              </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>{team.name}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{groupName} · {teamPlayers.length} jugadores</div>
+                  </div>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setEditingTeam(team.id);
+                      setEditTeamName(team.name);
+                      setEditGroupName(groupName === "Sin grupo" ? "" : groupName);
+                    }}
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: "var(--text-muted)" }}
+                  >
+                    <Pencil size={15} />
+                  </button>
+                  <button
+                    onClick={e => { e.stopPropagation(); if (confirm(`¿Eliminar ${team.name}?`)) deleteTeam.mutate(team.id); }}
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: "var(--danger)" }}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                  {expanded ? <ChevronUp size={16} color="var(--text-muted)" /> : <ChevronDown size={16} color="var(--text-muted)" />}
+                </div>
+              )}
 
-              {expanded && (
+              {expanded && !isEditing && (
                 <div style={{ borderTop: "1px solid var(--border)", padding: 14 }}>
                   {teamPlayers.length === 0 && (
                     <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>Sin jugadores registrados</div>
