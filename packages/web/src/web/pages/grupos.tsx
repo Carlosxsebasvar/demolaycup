@@ -104,9 +104,6 @@ function GroupTable({ group }: { group: any }) {
           </div>
         ))}
       </div>
-      <div style={{ padding: "6px 4px", fontSize: 10, color: "var(--text-muted)" }}>
-        🟨 Top 2 avanzan a eliminatorias
-      </div>
     </div>
   );
 }
